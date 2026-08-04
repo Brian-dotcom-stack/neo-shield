@@ -1,0 +1,6 @@
+{
+  "name": "AegisShield Cybersecurity Platform",
+  "description": "Production-ready Cybersecurity SaaS selling VPN, Identity Theft, Malware, and Antivirus protection with subscriptions, interactive dashboard, Supabase Auth, and Stripe payment integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

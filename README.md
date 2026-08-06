@@ -8,7 +8,7 @@ Designed for high-conversion self-service customer acquisition, NEO-SHIELD featu
 
 ## 📸 Screenshots
 
-> **Note for Repository Maintainers / Acquire.com Sellers:**  
+> **Note:**  
 > Create a folder named `./screenshots/` in the root directory of your project and place your actual interface images using the filenames listed below.
 
 ### 1. Hero & Quad-Protection Landing Page
@@ -194,12 +194,6 @@ To complete the Stripe integration:
    - Add Supabase credentials (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`).
    - Add Stripe API keys and Price IDs.
 5. Click **Deploy**. Vercel will build and host your application automatically.
-
----
-
-## 📄 License
-
-Private - All Rights Reserved
 
 ---
 

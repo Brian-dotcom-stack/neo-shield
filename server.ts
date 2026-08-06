@@ -197,9 +197,14 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🛡️ AegisShield Full-Stack Cyber SaaS running on http://localhost:${PORT}`);
-  });
+// Only start the HTTP server in local/dev environments, not on Vercel
+  if (!process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🛡️ AegisShield Full-Stack Cyber SaaS running on http://localhost:${PORT}`);
+    });
+  }
 }
 
 startServer();
+
+export default app;

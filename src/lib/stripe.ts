@@ -3,8 +3,21 @@ import { PlanId, BillingCycle } from '../types';
 export interface CheckoutOptions {
   planId: PlanId;
   billingCycle: BillingCycle;
+  priceId?: string;
   userEmail?: string;
   userId?: string;
+}
+
+/**
+ * Resolves the Stripe Price ID for a plan + billing cycle.
+ * Uses Vite env vars (import.meta.env) when configured, otherwise returns ''.
+ */
+export function resolvePriceId(planId: PlanId, billingCycle: BillingCycle): string {
+  const env = import.meta.env;
+  const key = `${billingCycle === 'yearly' ? 'YEARLY' : 'MONTHLY'}`;
+  const priceId = env[`VITE_STRIPE_PRICE_${planId.toUpperCase()}_${key}`] as string | undefined;
+
+  return priceId || '';
 }
 
 /**
@@ -12,12 +25,18 @@ export interface CheckoutOptions {
  */
 export async function redirectToCheckout(options: CheckoutOptions): Promise<{ url?: string; error?: string }> {
   try {
+    const priceId = options.priceId || resolvePriceId(options.planId, options.billingCycle);
+
     const response = await fetch('/api/stripe/create-checkout-session', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(options),
+      body: JSON.stringify({
+        priceId,
+        userId: options.userId,
+        customerEmail: options.userEmail,
+      }),
     });
 
     const data = await response.json();

@@ -9,6 +9,8 @@ export const PLANS: PricingPlan[] = [
     yearlyPriceMonthlyEquivalent: 3.99,
     yearlyPriceTotal: 47.88,
     maxDevices: 2,
+    stripePriceIdMonthly: 'price_basic_monthly',
+    stripePriceIdYearly: 'price_basic_yearly',
     protectionModules: ['antivirus', 'malware'],
     features: [
       'Real-Time Antivirus Protection',
@@ -28,6 +30,8 @@ export const PLANS: PricingPlan[] = [
     yearlyPriceTotal: 95.88,
     popular: true,
     maxDevices: 5,
+    stripePriceIdMonthly: 'price_pro_monthly',
+    stripePriceIdYearly: 'price_pro_yearly',
     protectionModules: ['vpn', 'identity', 'malware', 'antivirus'],
     features: [
       'Everything in Basic Shield',
@@ -47,6 +51,8 @@ export const PLANS: PricingPlan[] = [
     yearlyPriceMonthlyEquivalent: 13.99,
     yearlyPriceTotal: 167.88,
     maxDevices: 10,
+    stripePriceIdMonthly: 'price_family_monthly',
+    stripePriceIdYearly: 'price_family_yearly',
     protectionModules: ['vpn', 'identity', 'malware', 'antivirus'],
     features: [
       'Everything in Pro Defense',

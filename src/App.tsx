@@ -11,7 +11,6 @@ import { TrustSection } from './components/landing/TrustSection';
 import { FaqSection } from './components/landing/FaqSection';
 import { AuthModal } from './components/auth/AuthModal';
 import { DashboardOverview } from './components/dashboard/DashboardOverview';
-import { PlanId, BillingCycle } from './types';
 
 const MainAppContent: React.FC = () => {
   const { user } = useAuth();
@@ -19,27 +18,19 @@ const MainAppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<'landing' | 'dashboard'>('landing');
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  // Automatically switch to dashboard if user logs in
+// Automatically switch to dashboard if user logs in
   useEffect(() => {
-    // Check URL search parameters for Stripe return or checkout success
+    // Check URL search parameters for Stripe return (success=true)
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('checkout') === 'success' || urlParams.get('demo_checkout') === 'true') {
+    if (urlParams.get('success') === 'true') {
       addToast('Payment Successful!', 'Your AegisShield subscription is now active.', 'success');
       setCurrentView('dashboard');
       // Clean query params from URL
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (urlParams.get('checkout') === 'cancel') {
-      addToast('Checkout Canceled', 'No charges were made to your account.', 'info');
-      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [addToast]);
 
-  const handleSelectPlanDemo = (planId: PlanId, cycle: BillingCycle) => {
-    addToast('Subscription Activated', `Switched to ${planId.toUpperCase()} (${cycle} cycle).`, 'success');
-    setCurrentView('dashboard');
-  };
-
-  return (
+return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
       {/* Top Navbar */}
       <Navbar
@@ -67,10 +58,7 @@ const MainAppContent: React.FC = () => {
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
             />
-            <PricingSection
-              onOpenAuth={() => setAuthModalOpen(true)}
-              onSelectPlanDemo={handleSelectPlanDemo}
-            />
+<PricingSection onOpenAuth={() => setAuthModalOpen(true)} />
             <TrustSection />
             <FaqSection />
           </>

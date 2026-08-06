@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, Shield, Sparkles, Lock, ArrowRight, Zap } from 'lucide-react';
+import { Check, Shield, Sparkles, Lock, Zap } from 'lucide-react';
 import { PLANS } from '../../data/mockData';
 import { BillingCycle, PlanId } from '../../types';
 import { redirectToCheckout } from '../../lib/stripe';
@@ -8,11 +8,10 @@ import { useToast } from '../../context/ToastContext';
 
 interface PricingSectionProps {
   onOpenAuth: () => void;
-  onSelectPlanDemo?: (planId: PlanId, cycle: BillingCycle) => void;
 }
 
-export const PricingSection: React.FC<PricingSectionProps> = ({ onOpenAuth, onSelectPlanDemo }) => {
-  const { user, updateSubscriptionPlan } = useAuth();
+export const PricingSection: React.FC<PricingSectionProps> = ({ onOpenAuth }) => {
+  const { user } = useAuth();
   const { addToast } = useToast();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('yearly');
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
@@ -22,23 +21,27 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onOpenAuth, onSe
 
     try {
       if (user) {
+        // Resolve the Stripe Price ID for the selected plan + billing cycle
+        const plan = PLANS.find((p) => p.id === planId);
+        const priceId =
+          billingCycle === 'yearly'
+            ? plan?.stripePriceIdYearly
+            : plan?.stripePriceIdMonthly;
+
         // Trigger Stripe Checkout
         const res = await redirectToCheckout({
           planId,
           billingCycle,
+          priceId: priceId || undefined,
           userEmail: user.email,
           userId: user.id,
         });
 
+        // Always redirect to the real Stripe Checkout page
         if (res.url) {
-          // Check if demo parameters were attached or real Stripe session
-          if (res.url.includes('demo_checkout=true')) {
-            await updateSubscriptionPlan(planId, billingCycle);
-            if (onSelectPlanDemo) onSelectPlanDemo(planId, billingCycle);
-          } else {
-            // Real Stripe checkout redirect
-            window.location.href = res.url;
-          }
+          window.location.href = res.url;
+        } else {
+          addToast('Checkout Error', res.error || 'No checkout URL returned.', 'error');
         }
       } else {
         // Open Auth modal directly

@@ -64,57 +64,46 @@ app.get('/api/supabase/config', (req, res) => {
 // 3. Create Stripe Checkout Session
 app.post('/api/stripe/create-checkout-session', async (req, res) => {
   try {
-    const { planId, billingCycle, userEmail } = req.body;
-    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    // Accept priceId (required), userId (optional), customerEmail (optional)
+    const { priceId, userId, customerEmail } = req.body;
 
-    // If real Stripe key is configured, create real checkout session
-    if (stripe) {
-      // Resolve price ID from environment or fallback mapping
-      let priceId = '';
-      if (planId === 'basic') {
-        priceId =
-          billingCycle === 'yearly'
-            ? process.env.STRIPE_PRICE_BASIC_YEARLY || ''
-            : process.env.STRIPE_PRICE_BASIC_MONTHLY || '';
-      } else if (planId === 'pro') {
-        priceId =
-          billingCycle === 'yearly'
-            ? process.env.STRIPE_PRICE_PRO_YEARLY || ''
-            : process.env.STRIPE_PRICE_PRO_MONTHLY || '';
-      } else if (planId === 'family') {
-        priceId =
-          billingCycle === 'yearly'
-            ? process.env.STRIPE_PRICE_FAMILY_YEARLY || ''
-            : process.env.STRIPE_PRICE_FAMILY_MONTHLY || '';
-      }
+    // Base URL for building success/cancel redirect URLs
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'http://localhost:3000';
 
-      if (priceId) {
-        const session = await stripe.checkout.sessions.create({
-          payment_method_types: ['card'],
-          mode: 'subscription',
-          customer_email: userEmail || undefined,
-          line_items: [
-            {
-              price: priceId,
-              quantity: 1,
-            },
-          ],
-          success_url: `${appUrl}/?session_id={CHECKOUT_SESSION_ID}&checkout=success`,
-          cancel_url: `${appUrl}/?checkout=cancel`,
-        });
-
-        return res.json({ url: session.url });
-      }
+    // Validate required fields
+    if (!priceId || typeof priceId !== 'string' || !priceId.trim()) {
+      return res.status(400).json({ error: 'Missing required field: priceId' });
     }
 
-    // Interactive Demo Checkout Fallback URL (smooth client modal simulation)
-    return res.json({
-      url: `${appUrl}/?demo_checkout=true&plan=${planId}&cycle=${billingCycle}`,
-      isDemo: true,
+    // If real Stripe key is configured, create a real checkout session
+    if (stripe) {
+      const session = await stripe.checkout.sessions.create({
+        mode: 'subscription',
+        customer_email: customerEmail || undefined,
+        client_reference_id: userId || undefined,
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        success_url: `${appUrl}/dashboard?success=true`,
+        cancel_url: `${appUrl}/pricing`,
+      });
+
+      return res.json({ url: session.url });
+    }
+
+// Stripe is not configured — return a clear error so the payment is never faked
+    return res.status(500).json({
+      error: 'Stripe is not configured. Set STRIPE_SECRET_KEY in the server environment.',
     });
   } catch (error: any) {
     console.error('Checkout creation error:', error);
-    res.status(500).json({ error: error.message || 'Server error creating checkout session' });
+    res.status(500).json({
+      error: error.message || 'Server error creating checkout session',
+    });
   }
 });
 
